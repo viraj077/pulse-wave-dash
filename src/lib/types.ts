@@ -25,3 +25,11 @@ export interface DeviceData {
     battery: DeviceReading[];
   };
 }
+
+export interface RealTimeDeviceData {
+  deviceId: string;
+  voltage: number;
+  current: number;
+  temperature: number;
+  timestamp: number;
+}
