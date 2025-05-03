@@ -27,6 +27,17 @@ interface WebSocketProviderProps {
   url?: string;
 }
 
+// Mock data to use when WebSocket connection fails
+const generateMockData = (deviceId: string): RealTimeDeviceData => {
+  return {
+    deviceId,
+    voltage: Math.floor(Math.random() * 99),
+    current: Math.floor(Math.random() * 99),
+    temperature: Math.floor(Math.random() * 99),
+    timestamp: Date.now()
+  };
+};
+
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
   autoConnect = true,
@@ -35,6 +46,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const [isConnected, setIsConnected] = useState(false);
   const [deviceData, setDeviceData] = useState<Record<string, RealTimeDeviceData>>({});
   const { toast } = useToast();
+  const [useMockData, setUseMockData] = useState(false);
 
   const connect = (serverUrl: string) => {
     try {
@@ -47,9 +59,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     } catch (error) {
       console.error('Failed to connect to WebSocket:', error);
       setIsConnected(false);
+      setUseMockData(true);
       toast({
         title: "Connection Failed",
-        description: "Failed to connect to the device server.",
+        description: "Using mock data since WebSocket server is not available.",
         variant: "destructive",
       });
     }
@@ -80,14 +93,50 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       }));
     });
 
+    // Use mock data if WebSocket connection fails
+    let mockInterval: NodeJS.Timeout | null = null;
+    if (useMockData) {
+      mockInterval = setInterval(() => {
+        const d1Data = generateMockData('D1');
+        const d2Data = generateMockData('D2');
+        
+        setDeviceData(prevData => ({
+          ...prevData,
+          'D1': d1Data,
+          'D2': d2Data
+        }));
+      }, 1500);
+    }
+
     return () => {
       unsubscribe();
       disconnect();
+      if (mockInterval) {
+        clearInterval(mockInterval);
+      }
     };
-  }, [autoConnect, url]);
+  }, [autoConnect, url, useMockData]);
+
+  // Start using mock data if max reconnection attempts are reached
+  useEffect(() => {
+    const maxReconnectTimeout = setTimeout(() => {
+      // If no data after 5 seconds, switch to mock data
+      if (Object.keys(deviceData).length === 0) {
+        setUseMockData(true);
+        setIsConnected(false);
+        toast({
+          title: "Using Mock Data",
+          description: "WebSocket connection not established. Using mock data instead.",
+          variant: "default",
+        });
+      }
+    }, 5000);
+    
+    return () => clearTimeout(maxReconnectTimeout);
+  }, []);
 
   const value = {
-    isConnected,
+    isConnected: isConnected || useMockData,
     deviceData,
     connect,
     disconnect
