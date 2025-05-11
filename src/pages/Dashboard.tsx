@@ -59,26 +59,28 @@ const Dashboard = () => {
             <h2 className="text-xl font-semibold mb-2 flex items-center">
               WebSocket Real-time Data
               {isConnected && <span className="ml-2 text-xs text-green-500">Connected</span>}
-              {!isConnected && <span className="ml-2 text-xs text-red-500">Disconnected</span>}
+              {!isConnected && <span className="ml-2 text-xs text-red-500">Using Mock Data</span>}
             </h2>
             <p className="text-muted-foreground">
-              Live data from device sensors via WebSocket connection
+              {isConnected 
+                ? 'Live data from device sensors via WebSocket connection'
+                : 'Mock data generated locally (WebSocket connection failed)'}
             </p>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* D1 Data Card */}
-            {deviceData['D1'] ? (
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl">Device D1</CardTitle>
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/device-d1">View Details</Link>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-xl">Device D1</CardTitle>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/device-d1">View Details</Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {deviceData['D1'] ? (
                   <div className="space-y-4">
                     <RealTimeDeviceReading 
                       label="Voltage"
@@ -102,31 +104,29 @@ const Dashboard = () => {
                       timestamp={deviceData['D1'].timestamp}
                     />
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Device D1</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center py-10">
-                  <p className="text-muted-foreground">Waiting for data...</p>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="flex items-center justify-center py-10">
+                    <div className="text-center">
+                      <div className="h-4 w-4 rounded-full bg-primary/20 animate-ping mx-auto mb-4" />
+                      <p className="text-muted-foreground">Initializing data...</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
             
             {/* D2 Data Card */}
-            {deviceData['D2'] ? (
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl">Device D2</CardTitle>
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/device-d2">View Details</Link>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-xl">Device D2</CardTitle>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/device-d2">View Details</Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {deviceData['D2'] ? (
                   <div className="space-y-4">
                     <RealTimeDeviceReading 
                       label="Voltage"
@@ -150,18 +150,16 @@ const Dashboard = () => {
                       timestamp={deviceData['D2'].timestamp}
                     />
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Device D2</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center py-10">
-                  <p className="text-muted-foreground">Waiting for data...</p>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="flex items-center justify-center py-10">
+                    <div className="text-center">
+                      <div className="h-4 w-4 rounded-full bg-primary/20 animate-ping mx-auto mb-4" />
+                      <p className="text-muted-foreground">Initializing data...</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </section>
         

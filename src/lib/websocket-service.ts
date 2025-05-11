@@ -5,7 +5,7 @@ class WebSocketService {
   private socket: WebSocket | null = null;
   private listeners: Set<DeviceDataCallback> = new Set();
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts = 3;
   private reconnectDelay = 1000; // ms
   
   connect(url: string): void {
@@ -48,11 +48,14 @@ class WebSocketService {
       
       this.socket.onerror = (error) => {
         console.error('WebSocket error:', error);
-        this.socket?.close();
+        if (this.socket) {
+          this.socket.close();
+        }
       };
     } catch (error) {
       console.error('Failed to establish WebSocket connection:', error);
       this.attemptReconnect(url);
+      throw new Error('WebSocket connection failed');
     }
   }
   
@@ -67,7 +70,7 @@ class WebSocketService {
     
     setTimeout(() => {
       this.connect(url);
-    }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1)); // Exponential backoff
+    }, this.reconnectDelay * Math.pow(1.5, this.reconnectAttempts - 1)); // Exponential backoff
   }
   
   subscribe(callback: DeviceDataCallback): () => void {
@@ -100,3 +103,4 @@ class WebSocketService {
 
 // Export a singleton instance
 export const websocketService = new WebSocketService();
+
