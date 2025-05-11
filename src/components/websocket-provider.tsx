@@ -9,6 +9,8 @@ interface WebSocketContextValue {
   deviceData: Record<string, RealTimeDeviceData>;
   connect: (url: string) => void;
   disconnect: () => void;
+  setWebSocketUrl: (url: string) => void;
+  webSocketUrl: string;
 }
 
 const WebSocketContext = createContext<WebSocketContextValue | undefined>(undefined);
@@ -38,20 +40,45 @@ const generateMockData = (deviceId: string): RealTimeDeviceData => {
   };
 };
 
+// Check if there's a saved WebSocket URL in localStorage
+const getSavedWebSocketUrl = (): string => {
+  const savedUrl = localStorage.getItem('websocket_url');
+  return savedUrl || 'ws://localhost:8080';
+};
+
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
   autoConnect = true,
-  url = 'ws://localhost:8080'
+  url = getSavedWebSocketUrl()
 }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [deviceData, setDeviceData] = useState<Record<string, RealTimeDeviceData>>({});
   const { toast } = useToast();
   const [useMockData, setUseMockData] = useState(false);
+  const [webSocketUrl, setWebSocketUrl] = useState<string>(url);
+  
+  // Save WebSocket URL to localStorage
+  const updateWebSocketUrl = (newUrl: string) => {
+    localStorage.setItem('websocket_url', newUrl);
+    setWebSocketUrl(newUrl);
+    
+    // Disconnect from current connection
+    disconnect();
+    
+    // Try to connect to the new URL
+    connect(newUrl);
+    
+    toast({
+      title: "WebSocket URL Updated",
+      description: `Attempting to connect to: ${newUrl}`,
+    });
+  };
 
   const connect = (serverUrl: string) => {
     try {
       websocketService.connect(serverUrl);
       setIsConnected(true);
+      setUseMockData(false);
       toast({
         title: "WebSocket Connected",
         description: "Successfully connected to the device server.",
@@ -74,8 +101,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   };
 
   useEffect(() => {
-    if (autoConnect && url) {
-      connect(url);
+    if (autoConnect && webSocketUrl) {
+      connect(webSocketUrl);
     }
 
     const unsubscribe = websocketService.subscribe((deviceId, voltage, current, temperature) => {
@@ -115,7 +142,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
         clearInterval(mockInterval);
       }
     };
-  }, [autoConnect, url, useMockData]);
+  }, [autoConnect, webSocketUrl, useMockData]);
 
   // Start using mock data if max reconnection attempts are reached
   useEffect(() => {
@@ -139,7 +166,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     isConnected: isConnected || useMockData,
     deviceData,
     connect,
-    disconnect
+    disconnect,
+    webSocketUrl,
+    setWebSocketUrl: updateWebSocketUrl
   };
 
   return (

@@ -9,6 +9,7 @@ import { formatTimestamp } from '@/lib/utils';
 import { RefreshCw, Gauge } from 'lucide-react';
 import { useWebSocket } from '@/components/websocket-provider';
 import { RealTimeDeviceReading } from '@/components/real-time-device-reading';
+import { WebSocketSettings } from '@/components/websocket-settings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -43,6 +44,7 @@ const Dashboard = () => {
             <h1 className="text-2xl font-bold">PulseWaveDash</h1>
           </div>
           <div className="flex items-center gap-4">
+            <WebSocketSettings />
             <div className="text-sm text-muted-foreground hidden md:block">
               Last updated: {formatTimestamp(lastUpdate)}
             </div>
@@ -72,7 +74,7 @@ const Dashboard = () => {
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-xl">Device D1</CardTitle>
                     <Button asChild variant="outline" size="sm">
-                      <Link to={`/device/D1`}>View Details</Link>
+                      <Link to="/device-d1">View Details</Link>
                     </Button>
                   </div>
                 </CardHeader>

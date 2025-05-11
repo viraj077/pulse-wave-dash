@@ -8,8 +8,9 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { WebSocketProvider } from "@/components/websocket-provider";
 import Dashboard from "./pages/Dashboard";
 import DeviceDetail from "./pages/DeviceDetail";
-import NotFound from "./pages/NotFound";
+import DeviceD1 from "./pages/DeviceD1";
 import DeviceD2 from "./pages/DeviceD2";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/device/:id" element={<DeviceDetail />} />
+              <Route path="/device-d1" element={<DeviceD1 />} />
               <Route path="/device-d2" element={<DeviceD2 />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
